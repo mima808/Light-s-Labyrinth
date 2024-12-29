@@ -39,10 +39,10 @@ let particlesGroup;
 
 
   // Setup for positioning and other constants
-  const scoreX = 348;
+  const scoreX = 352;
   const scoreY = 40;
-  const scoreRevealWidth = 80;
-  const scoreRevealHeight = 16;
+  const scoreRevealWidth = 85;
+  const scoreRevealHeight = 21;
   const muteX = 348;
   const muteY = 15;
   const muteRevealWidth = 60;
@@ -190,7 +190,7 @@ let particlesGroup;
     stroke("black");
     strokeWeight(3);
     text(
-      "Objective: \nFind all the lanterns to light up \nthe maze, \nand remove the mushroom \nblocking the maze's end.\n\nGameplay: \nThe screen will start covered in darkness. \nYou'll have the maze revealed for 6 seconds \nat the beginning to quickly navigate \nand get your bearings.\n Press p to pause the game. \n\n Mechanics: \nMove using your arrow keys.",
+      "Objective: \nFind all the lanterns to light up \nthe maze, \nand remove the mushroom \nblocking the maze's end.\n\nGameplay: \nThe screen will start covered in darkness. \nYou'll have the maze revealed for 6 seconds \nat the beginning to quickly navigate \nand get your bearings.\n Press p if you want to pause the game. \n\n Mechanics: \nMove using your arrow keys.",
       width / 2,
       60
     );
@@ -265,7 +265,7 @@ let particlesGroup;
     // Set a timeout to show the overlay after 2.5 seconds
     setTimeout(() => {
       showOverlay = true;
-    }, 2500);
+    }, 4000);
   }
 
   function showMessageInCenter(text, duration) {
@@ -289,7 +289,7 @@ let particlesGroup;
     showOverlayLevel2 = false;
     setTimeout(() => {
       showOverlayLevel2 = true;
-    }, 6000);
+    }, 7000);
   }
   function setupLevel2() {
     background(maze2img);
@@ -411,7 +411,7 @@ let particlesGroup;
     showOverlayLevel2 = false;
     setTimeout(() => {
       showOverlayLevel3 = true;
-    },6000);
+    },7000);
   }
 
   function setupLevel3() {
@@ -528,7 +528,7 @@ let particlesGroup;
     textAlign(CENTER);
     stroke(255);
     strokeWeight(3);
-    text("Congratulations! \n\nYou've conquered the darkness \nand found the light. \n\nThank you for playing Light's Labyrinth. \nUntil next time, keep seeking the light!", width / 2, height/2 );
+    text("Congratulations! \n\nYou've conquered the darkness \nand found the light. \n\nThank you for playing Light's Labyrinth. \nUntil next time, keep seeking the light!", width / 2 , height / 2 - 57);
   }
 
   /* DRAW FUNCTIONS FOR INDIVIDUAL SCREENS */
@@ -680,7 +680,7 @@ textSize(18)
     fill("white");
     textSize(16);
     strokeWeight(0);
-    text("Score = " + score, 348, 40);
+    text("Score = " + score, 346, 44);
 
     // Draw all sprites
     drawSprites();
@@ -718,12 +718,16 @@ function handlePlayerMovement() {
 
   function handleLanternCollisions() {
     if (currentLevel === 1) {
+      textSize(13);
+      text("                        /3    " + score, 352, 44);
+
       if (player.collides(lantern1) && !hasCollided1) {
         revealedAreaSize += 40;
        // lanternsCollectedPerLevel[1]++;
         hasCollided1 = true;
         score++;
         if (score < 3) point.play();
+        
       }
       if (player.collides(lantern2) && !hasCollided2) {
         revealedAreaSize += 40;
@@ -740,6 +744,9 @@ function handlePlayerMovement() {
         if (score < 3) point.play();
       }
     } else if (currentLevel === 2) {
+      textSize(13);
+      text("                        /4    " + score, 352, 46);
+
 
       if (player.collides(lantern9) && !hasCollided9) {
         revealedAreaSize += 40;
@@ -770,6 +777,9 @@ function handlePlayerMovement() {
         if (score < 4) point.play();
       }
     } else if (currentLevel === 3) {
+      textSize(13);
+      text("                        /5    " + score, 352, 46);
+
         if (player.collides(lantern4) && !hasCollided4) {
           revealedAreaSize += 40;
           //lanternsCollectedPerLevel[2]++;
