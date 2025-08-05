@@ -6,7 +6,7 @@
   let overlayGraphics;
   let person1img, lanternimg, mazeimg, maze2img, gameimg, rulesimg, playerimg, lastimg, mushimg, badmushimg, webimg, pauseimg;
   let greatVibes, lss;
-  let revealedAreaSize = 80;
+  let revealedAreaSize = 120;
   let hasCollided1 = false;
   let hasCollided2 = false;
   let hasCollided3 = false;
@@ -20,7 +20,7 @@
   let currentLevel = 1;
   let mushroomGroup;
   let webGroup;
-  let MAX_SPEED = 3;
+  let MAX_SPEED = 4.5;
   let isSlowedDown = false;
   let slowDownEndTime = 0;
   //let lanternsCollected = 0;
@@ -39,17 +39,17 @@ let particlesGroup;
 
 
   // Setup for positioning and other constants
-  const scoreX = 352;
-  const scoreY = 40;
-  const scoreRevealWidth = 85;
-  const scoreRevealHeight = 21;
-  const muteX = 348;
-  const muteY = 15;
-  const muteRevealWidth = 60;
-  const muteRevealHeight = 20;
+  const scoreX = 528;
+  const scoreY = 60;
+  const scoreRevealWidth = 128;
+  const scoreRevealHeight = 32;
+  const muteX = 522;
+  const muteY = 23;
+  const muteRevealWidth = 90;
+  const muteRevealHeight = 30;
   const ACCELERATION = 0.2;
   const FRICTION = 0.9;
-  const MIN_REVEALED_AREA_SIZE = 40
+  const MIN_REVEALED_AREA_SIZE = 60
   /* PRELOAD FUNCTION */
   function preload() {
     //Images
@@ -79,16 +79,19 @@ let particlesGroup;
 
   /* SETUP FUNCTION */
   function setup() {
-    createCanvas(400, 400);
+    createCanvas(600, 600);
     forest.loop();
+    
+    // Disable automatic sprite drawing so we can control the order
+    allSprites.autoDraw = false;
 
     // Resize images
-    person1img.resize(0, 30);
-    lanternimg.resize(0, 35);
-    playerimg.resize(0, 40);
-    mushimg.resize(0, 60);
-    badmushimg.resize(0, 35);
-    webimg.resize(0, 35);
+    person1img.resize(0, 45);
+    lanternimg.resize(0, 53);
+    playerimg.resize(0, 60);
+    mushimg.resize(0, 90);
+    badmushimg.resize(0, 53);
+    webimg.resize(0, 53);
     // Set sound volumes
     forest.setVolume(0.1);
     point.setVolume(0.6);
@@ -97,21 +100,21 @@ let particlesGroup;
     click.setVolume(0.8);
 
     homeScreenAssets();
-    overlayGraphics = createGraphics(400, 400);
+    overlayGraphics = createGraphics(600, 600);
 
     // Create back button
-    backButton = new Sprite(width - 50, height - 30, 80, 30, 'k');
+    backButton = new Sprite(width - 75, height - 45, 120, 45, 'k');
     backButton.color = "#174440";
     backButton.textColor = "white";
-    backButton.textSize = 14;
+    backButton.textSize = 21;
     backButton.text = "Back";
-    backButton.pos = { x: -100, y: -100 };
+    backButton.pos = { x: -150, y: -150 };
 
     // Create mute button
-    muteButton = new Sprite(348, 15, 60, 20, 'k');
+    muteButton = new Sprite(522, 23, 90, 30, 'k');
     muteButton.color = "#174440";
     muteButton.textColor = "white";
-    muteButton.textSize = 12;
+    muteButton.textSize = 18;
     muteButton.text = "Mute";
 
   }
@@ -127,7 +130,11 @@ let particlesGroup;
       endScreenAssets();
     } else if (screen === 4) {
       rulesScreenAssets();
-      backButton.pos = { x: 350, y: 380 };
+      backButton.pos = { x: 525, y: 570 };
+
+      // Manually draw sprites for rules screen since autoDraw is disabled
+      allSprites.draw();
+      
     } else {
       backButton.pos = { x: -100, y: -100 };
     }
@@ -143,37 +150,44 @@ let particlesGroup;
 
     // Create title
     fill("#dbe187");
-    textSize(35);
+    textSize(53);
     textFont(lss);
     strokeWeight(0);
     textAlign(CENTER);
-    text("Light's Labyrinth", width / 2, 70);
+    text("Light's Labyrinth", width / 2, 105);
 
     // Create message
     fill("#238580");
-    textSize(15);
+    textSize(23);
     textAlign(CENTER);
     stroke(255);
-    strokeWeight(4);
-    text("In a world covered \nin darkness, your journey to \nfind the light begins \nnow", width / 2, 135);
+    strokeWeight(6);
+    text("In a world covered \nin darkness, your journey to \nfind the light begins \nnow", width / 2, 203);
     strokeWeight(0);
 
-    // Create play button
+    // Position buttons instead of creating new ones
     textFont(lss);
-    playButton = new Sprite(width / 2, 280, 100, 30, 'k');
-    playButton.color = "#174440";
-    playButton.textColor = "white";
-    playButton.stroke = color(103, 213, 0, 0);
-    playButton.textSize = 14;
-    playButton.text = "Play";
+    if (!playButton) {
+      playButton = new Sprite(width / 2, 420, 150, 45, 'k');
+      playButton.color = "#174440";
+      playButton.textColor = "white";
+      playButton.stroke = color(103, 213, 0, 0);
+      playButton.textSize = 21;
+      playButton.text = "Play";
+    } else {
+      playButton.pos = { x: width / 2, y: 420 };
+    }
 
-    // Create How to Play button
-    htpButton = new Sprite(width / 2, 230, 100, 30, 'k');
-    htpButton.color = "#174440";
-    htpButton.textColor = "white";
-    htpButton.stroke = color(103, 230, 0, 0);
-    htpButton.textSize = 14;
-    htpButton.text = "How to Play";
+    if (!htpButton) {
+      htpButton = new Sprite(width / 2, 345, 150, 45, 'k');
+      htpButton.color = "#174440";
+      htpButton.textColor = "white";
+      htpButton.stroke = color(103, 230, 0, 0);
+      htpButton.textSize = 21;
+      htpButton.text = "How to Play";
+    } else {
+      htpButton.pos = { x: width / 2, y: 345 };
+    }
   }
 
   function rulesScreenAssets() {
@@ -185,14 +199,14 @@ let particlesGroup;
 
     // Create message
     fill("white");
-    textSize(16);
+    textSize(24);
     textAlign(CENTER);
     stroke("black");
-    strokeWeight(3);
+    strokeWeight(5);
     text(
       "Objective: \nFind all the lanterns to light up \nthe maze, \nand remove the mushroom \nblocking the maze's end.\n\nGameplay: \nThe screen will start covered in darkness. \nYou'll have the maze revealed for 6 seconds \nat the beginning to quickly navigate \nand get your bearings.\n Press p if you want to pause the game. \n\n Mechanics: \nMove using your arrow keys.",
       width / 2,
-      60
+      90
     );
     strokeWeight(0);
   }
@@ -205,17 +219,17 @@ let particlesGroup;
     htpButton.pos = { x: -200, y: -100 };
 
     // Create player sprite
-    player = new Sprite(playerimg, 370, 50, 11, 11);
+    player = new Sprite(playerimg, 555, 75, 17, 17);
     player.color = color(255);
     player.rotationLock = true;
 
     // Create lanterns
-    lantern1 = new Sprite(lanternimg, 220, 130, 's');
-    lantern2 = new Sprite(lanternimg, 125, 275, 's');
-    lantern3 = new Sprite(lanternimg, 180, 80, 's');
+    lantern1 = new Sprite(lanternimg, 330, 195, 's');
+    lantern2 = new Sprite(lanternimg, 188, 413, 's');
+    lantern3 = new Sprite(lanternimg, 270, 120, 's');
 
     // Create end sprite
-    endSprite = new Sprite(mushimg, 45, 365, 70, 70, 'k');
+    endSprite = new Sprite(mushimg, 68, 548, 105, 105, 'k');
     endSprite.color = "#7fae11";
     strokeWeight(0);
 
@@ -227,39 +241,39 @@ let particlesGroup;
 
     // Maze Walls creation
     //Borders
-    new walls.Sprite(150, 4.9, 340, 10);
-    new walls.Sprite(4.9, 200, 16, 500);
-    new walls.Sprite(235, 394.9, 330, 10);
-    new walls.Sprite(395, 195, 10, 390);
+    new walls.Sprite(225, 7.35, 510, 15);
+    new walls.Sprite(7.35, 300, 24, 750);
+    new walls.Sprite(353, 592.35, 495, 15);
+    new walls.Sprite(593, 293, 15, 585);
     //Walls
-    new walls.Sprite(54, 249, 10, 206);
-    new walls.Sprite(110, 151, 100, 10);
-    new walls.Sprite(80, 347, 60, 10);
-    new walls.Sprite(107, 366, 10, 48);
-    new walls.Sprite(104, 102, 188, 10);
-    new walls.Sprite(202, 298, 185, 10);
-    new walls.Sprite(155, 328, 10, 48);
-    new walls.Sprite(184, 347, 48, 10);
-    new walls.Sprite(203, 370, 10, 48);
-    new walls.Sprite(106, 253, 10, 100);
-    new walls.Sprite(203, 154, 10, 190);
-    new walls.Sprite(155, 54, 202, 10);
-    new walls.Sprite(130, 200, 58, 10);
-    new walls.Sprite(155, 225, 10, 57);
-    new walls.Sprite(225, 151, 53, 10);
-    new walls.Sprite(227, 249, 57, 10);
-    new walls.Sprite(251, 175, 10, 58);
-    new walls.Sprite(299, 70, 10, 172);
-    new walls.Sprite(327, 151, 51, 10);
-    new walls.Sprite(276, 200, 58, 10);
-    new walls.Sprite(327, 54, 58, 10);
-    new walls.Sprite(275, 102, 40, 10);
-    new walls.Sprite(370, 102, 58, 10);
-    new walls.Sprite(299, 298, 10, 108);
-    new walls.Sprite(370, 298, 58, 10);
-    new walls.Sprite(300, 347, 105, 10);
-    new walls.Sprite(325, 249, 55, 10);
-    new walls.Sprite(347, 225, 10, 57);
+    new walls.Sprite(81, 374, 15, 309);
+    new walls.Sprite(165, 227, 150, 15);
+    new walls.Sprite(120, 521, 90, 15);
+    new walls.Sprite(161, 549, 15, 72);
+    new walls.Sprite(156, 153, 282, 15);
+    new walls.Sprite(303, 447, 278, 15);
+    new walls.Sprite(233, 492, 15, 72);
+    new walls.Sprite(276, 521, 72, 15);
+    new walls.Sprite(305, 555, 15, 72);
+    new walls.Sprite(159, 380, 15, 150);
+    new walls.Sprite(305, 231, 15, 285);
+    new walls.Sprite(233, 81, 303, 15);
+    new walls.Sprite(195, 300, 87, 15);
+    new walls.Sprite(233, 338, 15, 86);
+    new walls.Sprite(338, 227, 80, 15);
+    new walls.Sprite(341, 374, 86, 15);
+    new walls.Sprite(377, 263, 15, 87);
+    new walls.Sprite(449, 105, 15, 258);
+    new walls.Sprite(491, 227, 77, 15);
+    new walls.Sprite(414, 300, 87, 15);
+    new walls.Sprite(491, 81, 87, 15);
+    new walls.Sprite(413, 153, 60, 15);
+    new walls.Sprite(555, 153, 87, 15);
+    new walls.Sprite(449, 447, 15, 162);
+    new walls.Sprite(555, 447, 87, 15);
+    new walls.Sprite(450, 521, 158, 15);
+    new walls.Sprite(488, 374, 83, 15);
+    new walls.Sprite(521, 338, 15, 86);
 
 
     // Set a timeout to show the overlay after 2.5 seconds
@@ -283,7 +297,7 @@ let particlesGroup;
     currentLevel = 3;
      //lanternsCollectedPerLevel[2] = score; // Store lanterns collected in level 1
     setupLevel2();
-     player.pos = {x: 370, y: 50};
+     player.pos = {x: 555, y: 75};
     // Hide the overlay for 2.5 seconds
     showOverlay = false;
     showOverlayLevel2 = false;
@@ -294,7 +308,7 @@ let particlesGroup;
   function setupLevel2() {
     background(maze2img);
     endSprite.remove();
-    player.pos = {x: 370, y: 50}; // Reset player position
+    player.pos = {x: 555, y: 75}; // Reset player position
 
     // Remove old walls
     walls.removeAll();
@@ -306,7 +320,7 @@ let particlesGroup;
     lantern11.remove();
     lantern12.remove();
 
-    revealedAreaSize = 80;
+    revealedAreaSize = 120;
 
     showMessageInCenter("Shrooms in your way? \nThey'll cloud your vision and weigh\nyou down.", 3300);
 
@@ -319,32 +333,32 @@ let particlesGroup;
    // new mushroomGroup.Sprite(badmushimg, 210, 380, 30, 30, 's');
 
     // Create the moving object (using badmushimg)
-    movingObject = new Sprite(badmushimg, 180, 90, 30, 30, 'k'); 
-    movingObject.vel.x = 2; // Initial horizontal speed
+    movingObject = new Sprite(badmushimg, 270, 135, 45, 45, 'k'); 
+    movingObject.vel.x = 3; // Initial horizontal speed
     mushroomGroup.add(movingObject); 
 
-    movingObject2 = new Sprite(badmushimg, 187, 130, 30, 30, 'k'); 
-    movingObject2.vel.y = 1; // Initial horizontal speed
+    movingObject2 = new Sprite(badmushimg, 281, 195, 45, 45, 'k'); 
+    movingObject2.vel.y = 1.5; // Initial horizontal speed
     mushroomGroup.add(movingObject2); 
 
-    movingObject3 = new Sprite(badmushimg, 210, 387, 30, 30, 'k'); 
-    movingObject3.vel.x = 1; // Initial horizontal speed
+    movingObject3 = new Sprite(badmushimg, 315, 581, 45, 45, 'k'); 
+    movingObject3.vel.x = 1.5; // Initial horizontal speed
     mushroomGroup.add(movingObject3); 
 
     // Create new walls for level 2
     createWallsForLevel2();
 
-    endSprite = new Sprite(mushimg, 45, 365, 60, 30, 'k');
+    endSprite = new Sprite(mushimg, 68, 548, 90, 45, 'k');
     endSprite.color = "#7fae11";
     strokeWeight(0);
 
 
     // Create 4 new lanterns for level 2
-    lantern4 = new Sprite(lanternimg, 250, 33, 's');
-    lantern5 = new Sprite(lanternimg, 130, 220, 's');
-    lantern6 = new Sprite(lanternimg, 280, 325, 's');
-    lantern7 = new Sprite(lanternimg, 180, 373, 's');
-    lantern8 = new Sprite(lanternimg, 280, 85, 's');
+    lantern4 = new Sprite(lanternimg, 375, 50, 's');
+    lantern5 = new Sprite(lanternimg, 195, 330, 's');
+    lantern6 = new Sprite(lanternimg, 420, 488, 's');
+    lantern7 = new Sprite(lanternimg, 270, 560, 's');
+    lantern8 = new Sprite(lanternimg, 420, 128, 's');
     // Reset collision states for new level
     hasCollided4 = false;
     hasCollided5 = false;
@@ -366,46 +380,46 @@ let particlesGroup;
     walls.color = color(103, 212, 0, 0);
     walls.collider = "s";
     //Borders
-    new walls.Sprite(150, 4.9, 340, 10);
-    new walls.Sprite(4.9, 200, 16, 500);
-    new walls.Sprite(235, 394.9, 330, 10);
-    new walls.Sprite(395, 195, 10, 390);
+    new walls.Sprite(225, 7.35, 510, 15);
+    new walls.Sprite(7.35, 300, 24, 750);
+    new walls.Sprite(353, 592.35, 495, 15);
+    new walls.Sprite(593, 293, 15, 585);
     //Walls
-    new walls.Sprite(54, 249, 10, 206);
-    new walls.Sprite(110, 151, 100, 10);
-    new walls.Sprite(80, 347, 60, 10);
-    new walls.Sprite(107, 366, 10, 48);
-    new walls.Sprite(123, 102, 155, 10);
-    new walls.Sprite(202, 298, 185, 10);
-    new walls.Sprite(155, 328, 10, 48);
-    new walls.Sprite(184, 347, 48, 10);
-    new walls.Sprite(203, 370, 10, 48);
-    new walls.Sprite(106, 253, 10, 100);
-    new walls.Sprite(203, 154, 10, 190);
-    new walls.Sprite(175, 54, 240, 10);
-    new walls.Sprite(130, 200, 58, 10);
-    new walls.Sprite(155, 225, 10, 57);
-    new walls.Sprite(225, 151, 53, 10);
-    new walls.Sprite(227, 249, 57, 10);
-    new walls.Sprite(251, 175, 10, 58);
-    new walls.Sprite(299, 70, 10, 172);
-    new walls.Sprite(327, 151, 51, 10);
-    new walls.Sprite(276, 200, 58, 10);
-    new walls.Sprite(327, 54, 58, 10);
-    new walls.Sprite(275, 102, 40, 10)
-    new walls.Sprite(370, 102, 58, 10);
-    new walls.Sprite(299, 298, 10, 108);
-    new walls.Sprite(370, 298, 58, 10);
-    new walls.Sprite(300, 347, 105, 10);
-    new walls.Sprite(325, 249, 55, 10);
-    new walls.Sprite(347, 225, 10, 57);
+    new walls.Sprite(81, 374, 15, 309);
+    new walls.Sprite(165, 227, 150, 15);
+    new walls.Sprite(120, 521, 90, 15);
+    new walls.Sprite(161, 549, 15, 72);
+    new walls.Sprite(185, 153, 233, 15);
+    new walls.Sprite(303, 447, 278, 15);
+    new walls.Sprite(233, 492, 15, 72);
+    new walls.Sprite(276, 521, 72, 15);
+    new walls.Sprite(305, 555, 15, 72);
+    new walls.Sprite(159, 380, 15, 150);
+    new walls.Sprite(305, 231, 15, 285);
+    new walls.Sprite(263, 81, 360, 15);
+    new walls.Sprite(195, 300, 87, 15);
+    new walls.Sprite(233, 338, 15, 86);
+    new walls.Sprite(338, 227, 80, 15);
+    new walls.Sprite(341, 374, 86, 15);
+    new walls.Sprite(377, 263, 15, 87);
+    new walls.Sprite(449, 105, 15, 258);
+    new walls.Sprite(491, 227, 77, 15);
+    new walls.Sprite(414, 300, 87, 15);
+    new walls.Sprite(491, 81, 87, 15);
+    new walls.Sprite(413, 153, 60, 15);
+    new walls.Sprite(555, 153, 87, 15);
+    new walls.Sprite(449, 447, 15, 162);
+    new walls.Sprite(555, 447, 87, 15);
+    new walls.Sprite(450, 521, 158, 15);
+    new walls.Sprite(488, 374, 83, 15);
+    new walls.Sprite(521, 338, 15, 86);
   }
 
   function transitionToLevel3() {
     currentLevel = 2;
    // lanternsCollectedPerLevel[1] = score;
     setupLevel3();
-    player.pos = {x: 370, y: 50};
+    player.pos = {x: 555, y: 75};
     // Hide the overlay for 2.5 seconds
     showOverlay = false;
     showOverlayLevel2 = false;
@@ -417,14 +431,14 @@ let particlesGroup;
   function setupLevel3() {
     background(maze2img); 
     endSprite.remove();
-    player.pos = {x: 370, y: 50}; // Reset player position
+    player.pos = {x: 555, y: 75}; // Reset player position
 
     // Remove old lanterns
     lantern1.remove();
     lantern2.remove();
     lantern3.remove();
   walls.removeAll();
-    revealedAreaSize = 80;
+    revealedAreaSize = 120;
 
     showMessageInCenter("Tread carefully,\n the webs will tangle your steps!"
   , 3300);
@@ -433,16 +447,16 @@ let particlesGroup;
     webGroup = new Group();
     webGroup.collider = 's';
     // Add more mushroom sprites for increased difficulty
-    new webGroup.Sprite(webimg, 180, 75, 30, 30);
-    new webGroup.Sprite(webimg, 230, 175, 30, 30);
-    new webGroup.Sprite(webimg, 180, 320, 30, 30);
-    new webGroup.Sprite(webimg, 275, 75, 20, 20);
-    new webGroup.Sprite(webimg, 370, 315, 15, 15);
+    new webGroup.Sprite(webimg, 270, 113, 45, 45);
+    new webGroup.Sprite(webimg, 345, 263, 45, 45);
+    new webGroup.Sprite(webimg, 270, 480, 45, 45);
+    new webGroup.Sprite(webimg, 413, 113, 30, 30);
+    new webGroup.Sprite(webimg, 555, 473, 23, 23);
 
     // Create new walls for level 3
     createWallsForLevel3();
 
-    endSprite = new Sprite(mushimg, 45, 365, 60, 30, 'k');
+    endSprite = new Sprite(mushimg, 68, 548, 90, 45, 'k');
     endSprite.color = "#7fae11";
     strokeWeight(0);
 
@@ -450,10 +464,10 @@ let particlesGroup;
 
     // Create 4 new lanterns for level 2
 
-    lantern9 = new Sprite(lanternimg, 130, 220, 's');
-    lantern10 = new Sprite(lanternimg, 280, 325, 's');
-    lantern11 = new Sprite(lanternimg, 180, 373, 's');
-    lantern12 = new Sprite(lanternimg, 280, 33, 's');
+    lantern9 = new Sprite(lanternimg, 195, 330, 's');
+    lantern10 = new Sprite(lanternimg, 420, 488, 's');
+    lantern11 = new Sprite(lanternimg, 270, 560, 's');
+    lantern12 = new Sprite(lanternimg, 420, 50, 's');
 
     // Reset collision states for new level
 
@@ -475,39 +489,39 @@ let particlesGroup;
     walls.color = color(103, 212, 0, 0);
     walls.collider = "s";
     //Borders
-    new walls.Sprite(150, 4.9, 340, 10);
-    new walls.Sprite(4.9, 200, 16, 500);
-    new walls.Sprite(235, 394.9, 330, 10);
-    new walls.Sprite(395, 195, 10, 390);
+    new walls.Sprite(225, 7.35, 510, 15);
+    new walls.Sprite(7.35, 300, 24, 750);
+    new walls.Sprite(353, 592.35, 495, 15);
+    new walls.Sprite(593, 293, 15, 585);
     //Walls
-    new walls.Sprite(54, 249, 10, 206);
-    new walls.Sprite(110, 151, 100, 10);
-    new walls.Sprite(80, 347, 60, 10);
-    new walls.Sprite(107, 366, 10, 48);
-    new walls.Sprite(123, 102, 155, 10);
-    new walls.Sprite(202, 298, 185, 10);
-    new walls.Sprite(155, 328, 10, 48);
-    new walls.Sprite(184, 347, 48, 10);
-    new walls.Sprite(203, 370, 10, 48);
-    new walls.Sprite(106, 253, 10, 100);
-    new walls.Sprite(203, 154, 10, 190);
-    new walls.Sprite(175, 54, 240, 10);
-    new walls.Sprite(130, 200, 58, 10);
-    new walls.Sprite(155, 225, 10, 57);
-    new walls.Sprite(225, 151, 53, 10);
-    new walls.Sprite(227, 249, 57, 10);
-    new walls.Sprite(251, 175, 10, 58);
-    new walls.Sprite(299, 70, 10, 172);
-    new walls.Sprite(327, 151, 51, 10);
-    new walls.Sprite(276, 200, 58, 10);
-    new walls.Sprite(327, 54, 58, 10);
-    new walls.Sprite(275, 102, 40, 10)
-    new walls.Sprite(370, 102, 58, 10);
-    new walls.Sprite(299, 298, 10, 108);
-    new walls.Sprite(370, 298, 58, 10);
-    new walls.Sprite(300, 347, 105, 10);
-    new walls.Sprite(325, 249, 55, 10);
-    new walls.Sprite(347, 225, 10, 57);
+    new walls.Sprite(81, 374, 15, 309);
+    new walls.Sprite(165, 227, 150, 15);
+    new walls.Sprite(120, 521, 90, 15);
+    new walls.Sprite(161, 549, 15, 72);
+    new walls.Sprite(185, 153, 233, 15);
+    new walls.Sprite(303, 447, 278, 15);
+    new walls.Sprite(233, 492, 15, 72);
+    new walls.Sprite(276, 521, 72, 15);
+    new walls.Sprite(305, 555, 15, 72);
+    new walls.Sprite(159, 380, 15, 150);
+    new walls.Sprite(305, 231, 15, 285);
+    new walls.Sprite(263, 81, 360, 15);
+    new walls.Sprite(195, 300, 87, 15);
+    new walls.Sprite(233, 338, 15, 86);
+    new walls.Sprite(338, 227, 80, 15);
+    new walls.Sprite(341, 374, 86, 15);
+    new walls.Sprite(377, 263, 15, 87);
+    new walls.Sprite(449, 105, 15, 258);
+    new walls.Sprite(491, 227, 77, 15);
+    new walls.Sprite(414, 300, 87, 15);
+    new walls.Sprite(491, 81, 87, 15);
+    new walls.Sprite(413, 153, 60, 15);
+    new walls.Sprite(555, 153, 87, 15);
+    new walls.Sprite(449, 447, 15, 162);
+    new walls.Sprite(555, 447, 87, 15);
+    new walls.Sprite(450, 521, 158, 15);
+    new walls.Sprite(488, 374, 83, 15);
+    new walls.Sprite(521, 338, 15, 86);
   }
 
   function endScreenAssets() {
@@ -524,30 +538,65 @@ let particlesGroup;
     walls.x = -1000;
 
     fill("#184656");
-    textSize(17);
+    textSize(26);
     textAlign(CENTER);
     stroke(255);
-    strokeWeight(3);
-    text("Congratulations! \n\nYou've conquered the darkness \nand found the light. \n\nThank you for playing Light's Labyrinth. \nUntil next time, keep seeking the light!", width / 2 , height / 2 - 57);
+    strokeWeight(5);
+    text("Congratulations! \n\nYou've conquered the darkness \nand found the light. \n\nThank you for playing Light's Labyrinth. \nUntil next time, keep seeking the light!", width / 2 , height / 2 - 86);
   }
 
   /* DRAW FUNCTIONS FOR INDIVIDUAL SCREENS */
   function drawHomeScreen() {
-    if (playButton.mouse.presses()) {
-      screen = 1;
-      playScreenAssets();
-      click.play();
-    }
-    if (htpButton.mouse.presses()) {
-      screen = 4;
-      rulesScreenAssets();
-      click.play();
-    }
+    homeScreenAssets();
+    // Manually draw sprites for home screen since autoDraw is disabled
+    allSprites.draw();
+    // Button interactions are now handled in mousePressed()
   }
 
 function keyPressed() {
   if (screen === 1 && (key === 'p' || key === 'P')) {
     isPaused = !isPaused;
+  }
+}
+
+function mousePressed() {
+  // Check if mouse is over play button
+  if (screen === 0 && mouseX > playButton.x - playButton.w/2 && mouseX < playButton.x + playButton.w/2 &&
+      mouseY > playButton.y - playButton.h/2 && mouseY < playButton.y + playButton.h/2) {
+    screen = 1;
+    playScreenAssets();
+    if (!isMuted) click.play();
+    return;
+  }
+  
+  // Check if mouse is over how to play button
+  if (screen === 0 && mouseX > htpButton.x - htpButton.w/2 && mouseX < htpButton.x + htpButton.w/2 &&
+      mouseY > htpButton.y - htpButton.h/2 && mouseY < htpButton.y + htpButton.h/2) {
+    screen = 4;
+    rulesScreenAssets();
+    if (!isMuted) click.play();
+    return;
+  }
+  
+  // Check if mouse is over back button
+  if ((screen === 2 || screen === 4) && mouseX > backButton.x - backButton.w/2 && mouseX < backButton.x + backButton.w/2 &&
+      mouseY > backButton.y - backButton.h/2 && mouseY < backButton.y + backButton.h/2) {
+    screen = 0;
+    backButton.pos = { x: -100, y: -100 };
+    homeScreenAssets();
+    hasWon = false;
+    winPlayed = false;
+    if (!isMuted) click.play();
+    return;
+  }
+  
+  // Check if mouse is over mute button
+  if (mouseX > muteButton.x - muteButton.w/2 && mouseX < muteButton.x + muteButton.w/2 &&
+      mouseY > muteButton.y - muteButton.h/2 && mouseY < muteButton.y + muteButton.h/2) {
+    isMuted = !isMuted;
+    muteButton.text = isMuted ? "Unmute" : "Mute";
+    forest.setVolume(isMuted ? 0 : 0.1);
+    return;
   }
 }
 
@@ -557,20 +606,20 @@ function drawPauseMenu() {
   //rect(0, 0, width, height); // Cover the entire screen
   fill("#84c281");
   stroke("#184656");
-  strokeWeight(3);
-  textSize(30);
+  strokeWeight(5);
+  textSize(45);
   textAlign(CENTER, CENTER);
-  text("Pause for a cause!", width / 2, height / 2 - 65);
-  textSize(22)
+  text("Pause for a cause!", width / 2, height / 2 - 98);
+  textSize(33)
   fill("#184656");
   stroke("#84c281");
-  strokeWeight(3);
-  text('Your epic adventure will \nresume right where you left it!',  width / 2, height / 2 - 10)
-textSize(18)
+  strokeWeight(5);
+  text('Your epic adventure will \nresume right where you left it!',  width / 2, height / 2 - 15)
+textSize(27)
   fill("#184656");
   stroke("#84c281");
-  strokeWeight(3);
-  text('Press p to resume.',  width / 2, height / 2 + 55)
+  strokeWeight(5);
+  text('Press p to resume.',  width / 2, height / 2 + 83)
 }
 
 
@@ -585,6 +634,11 @@ textSize(18)
       background(maze2img);
     }
     
+    // Handle player movement with acceleration (always active, even when paused menu is shown)
+    if (!isPaused) {
+      handlePlayerMovement();
+    }
+    
     if (isPaused) {
       drawPauseMenu();
       return; // Skip the rest of the game rendering to keep it paused
@@ -593,63 +647,60 @@ textSize(18)
     player.x = constrain(player.x, 0, width); // Keep player within horizontal bounds
 
     if (showMessage) {
-      textSize(19);
+      textSize(29);
       textAlign(CENTER);
       fill("#8bc298");
       stroke("#184656")
-      strokeWeight(3)
-      text(messageText, width / 2,  height/2 - 50);
+      strokeWeight(5)
+      text(messageText, width / 2,  height/2 - 75);
     }
 
     if (currentLevel === 3) {
       // Bounce off walls
-      if (movingObject.x < 5 || movingObject.x > 180) {
+      if (movingObject.x < 8 || movingObject.x > 270) {
         movingObject.vel.x *= -1;
       }
       movingObject.x += movingObject.vel.x;
   //
-      if (movingObject2.y < 118 || movingObject2.y > 285) {
+      if (movingObject2.y < 177 || movingObject2.y > 428) {
         movingObject2.vel.y *= -1;
       }
       movingObject2.y += movingObject2.vel.y;
   //
-      if (movingObject3.x < 210 || movingObject3.x > 385) {
+      if (movingObject3.x < 315 || movingObject3.x > 578) {
         movingObject3.vel.x *= -1;
       }
       movingObject3.x += movingObject3.vel.x;
     }
 
-    // Handle player movement with acceleration
-     handlePlayerMovement();
-
     if (currentLevel === 1 && score >= 3 && !hasWon) {
-      endSprite.pos = { x: 45, y: 365 };
+      endSprite.pos = { x: 68, y: 548 };
       light.play();
       hasWon = true;
-      endSprite.vel.x = -0.5;
+      endSprite.vel.x = -0.75;
     } else if (currentLevel === 2 && score >= 4 && !hasWon) {
-      endSprite.pos = { x: 45, y: 365 };
+      endSprite.pos = { x: 68, y: 548 };
       light.play();
       hasWon = true;
-      endSprite.vel.x = -0.5;
+      endSprite.vel.x = -0.75;
     } else if (currentLevel === 3 && score >= 5 && !hasWon) {
-      endSprite.pos = { x: 45, y: 365 };
+      endSprite.pos = { x: 68, y: 548 };
       light.play();
       hasWon = true;
-      endSprite.vel.x = -0.5;
+      endSprite.vel.x = -0.75;
     }
 
-    if (currentLevel === 1 && hasWon && player.y > 400) {
+    if (currentLevel === 1 && hasWon && player.y > 600) {
       transitionToLevel3();
-    } else if (currentLevel === 2 && hasWon && player.y > 400) {
+    } else if (currentLevel === 2 && hasWon && player.y > 600) {
       transitionToLevel2();
-    } else if (currentLevel === 3 && player.y > 400 && player.x <= 64) {
+    } else if (currentLevel === 3 && player.y > 600 && player.x <= 96) {
       screen = 2; // Switch to end screen
       endScreenAssets();
     }
 
     // Player wins after completing level 3
-    if (currentLevel === 3 && player.y > 400 && player.x <= 64) {
+    if (currentLevel === 3 && player.y > 600 && player.x <= 96) {
       screen = 2; // Switch to end screen
       endScreenAssets();
     }
@@ -672,20 +723,20 @@ textSize(18)
     handleLanternCollisions();
 
     // Ensure player remains within maze boundaries
-    if (player.y < 20) {
-      player.y = 20;
+    if (player.y < 30) {
+      player.y = 30;
     }
 
     // Display score
     fill("white");
-    textSize(16);
+    textSize(24);
     strokeWeight(0);
-    text("Score = " + score, 346, 44);
+    text("Score = " + score, 519, 66);
 
-    // Draw all sprites
-    drawSprites();
+    // Manually draw all sprites first
+    allSprites.draw();
 
-    // Draw overlay
+    // Draw overlay AFTER sprites so it appears on top
     if ((showOverlay && currentLevel === 1) || 
         (showOverlayLevel3 && currentLevel === 2) || 
         (showOverlayLevel2 && currentLevel === 3)) {
@@ -698,17 +749,25 @@ textSize(18)
   }
 
 function handlePlayerMovement() {
-  // Player movement with acceleration
-  if (kb.pressing("left")) {
+  // Handle horizontal movement independently
+  let leftPressed = kb.pressing('left') || kb.pressing('a');
+  let rightPressed = kb.pressing('right') || kb.pressing('d');
+  
+  if (leftPressed && !rightPressed) {
     player.vel.x = max(player.vel.x - ACCELERATION, -MAX_SPEED);
-  } else if (kb.pressing("right")) {
+  } else if (rightPressed && !leftPressed) {
     player.vel.x = min(player.vel.x + ACCELERATION, MAX_SPEED);
   } else {
     player.vel.x *= FRICTION;
   }
-  if (kb.pressing("up")) {
+  
+  // Handle vertical movement independently
+  let upPressed = kb.pressing('up') || kb.pressing('w');
+  let downPressed = kb.pressing('down') || kb.pressing('s');
+  
+  if (upPressed && !downPressed) {
     player.vel.y = max(player.vel.y - ACCELERATION, -MAX_SPEED);
-  } else if (kb.pressing("down")) {
+  } else if (downPressed && !upPressed) {
     player.vel.y = min(player.vel.y + ACCELERATION, MAX_SPEED);
   } else {
     player.vel.y *= FRICTION;
@@ -718,11 +777,11 @@ function handlePlayerMovement() {
 
   function handleLanternCollisions() {
     if (currentLevel === 1) {
-      textSize(13);
-      text("                        /3    " + score, 352, 44);
+      textSize(20);
+      text("                        /3    " + score, 528, 66);
 
       if (player.collides(lantern1) && !hasCollided1) {
-        revealedAreaSize += 40;
+        revealedAreaSize += 60;
        // lanternsCollectedPerLevel[1]++;
         hasCollided1 = true;
         score++;
@@ -730,86 +789,86 @@ function handlePlayerMovement() {
         
       }
       if (player.collides(lantern2) && !hasCollided2) {
-        revealedAreaSize += 40;
+        revealedAreaSize += 60;
        // lanternsCollectedPerLevel[1]++;
         hasCollided2 = true;
         score++;
         if (score < 3) point.play();
       }
       if (player.collides(lantern3) && !hasCollided3) {
-        revealedAreaSize += 40;
+        revealedAreaSize += 60;
         //lanternsCollectedPerLevel[1]++;
         hasCollided3 = true;
         score++;
         if (score < 3) point.play();
       }
     } else if (currentLevel === 2) {
-      textSize(13);
-      text("                        /4    " + score, 352, 46);
+      textSize(20);
+      text("                        /4    " + score, 528, 69);
 
 
       if (player.collides(lantern9) && !hasCollided9) {
-        revealedAreaSize += 40;
+        revealedAreaSize += 60;
        // lanternsCollectedPerLevel[3]++;
         hasCollided9 = true;
         score++;
         if (score < 4) point.play();
     }
       if (player.collides(lantern10) && !hasCollided10) {
-        revealedAreaSize += 40;
+        revealedAreaSize += 60;
        // lanternsCollectedPerLevel[3]++;
         hasCollided10 = true;
         score++;
         if (score < 4) point.play();
       }
       if (player.collides(lantern11) && !hasCollided11) {
-        revealedAreaSize += 40;
+        revealedAreaSize += 60;
        // lanternsCollectedPerLevel[3]++;
         hasCollided11 = true;
         score++;
         if (score < 4) point.play();
       }
       if (player.collides(lantern12) && !hasCollided12) {
-        revealedAreaSize += 40;
+        revealedAreaSize += 60;
        // lanternsCollectedPerLevel[3]++;
         hasCollided12 = true;
         score++;
         if (score < 4) point.play();
       }
     } else if (currentLevel === 3) {
-      textSize(13);
-      text("                        /5    " + score, 352, 46);
+      textSize(20);
+      text("                        /5    " + score, 528, 69);
 
         if (player.collides(lantern4) && !hasCollided4) {
-          revealedAreaSize += 40;
+          revealedAreaSize += 60;
           //lanternsCollectedPerLevel[2]++;
           hasCollided4 = true;
           score++;
           if (score < 5) point.play();
         }
         if (player.collides(lantern5) && !hasCollided5) {
-          revealedAreaSize += 40;
+          revealedAreaSize += 60;
          // lanternsCollectedPerLevel[2]++;
           hasCollided5 = true;
           score++;
           if (score < 5) point.play();
         }
         if (player.collides(lantern6) && !hasCollided6) {
-          revealedAreaSize += 40;
+          revealedAreaSize += 60;
          // lanternsCollectedPerLevel[2]++;
           hasCollided6 = true;
           score++;
           if (score < 5) point.play();
         }
       if (player.collides(lantern7) && !hasCollided7) {
-        revealedAreaSize += 40;
+        revealedAreaSize += 60;
         hasCollided7 = true;
         score++;
         if (score < 5) point.play();
       }
 
       if (player.collides(lantern8) && !hasCollided8) {
-        revealedAreaSize += 40;
+        revealedAreaSize += 60;
         //lanternsCollectedPerLevel[3]++;
         hasCollided8 = true;
         score++;
@@ -827,7 +886,7 @@ function handlePlayerMovement() {
 
       // Apply the changes
       MAX_SPEED /= 2; // Reduce max speed by half
-      revealedAreaSize = Math.max(MIN_REVEALED_AREA_SIZE, revealedAreaSize - 40);
+      revealedAreaSize = Math.max(MIN_REVEALED_AREA_SIZE, revealedAreaSize - 60);
 
       // Log values after changes
       console.log("After:", { revealedAreaSize });
@@ -841,7 +900,7 @@ function handlePlayerMovement() {
       isSlowedDown = false;
       MAX_SPEED *= 2; // Reset to original speed
 
-      revealedAreaSize = (score*40 + 80)  
+      revealedAreaSize = (score*60 + 120)  
     }
   }
 
@@ -876,21 +935,10 @@ function handlePlayerMovement() {
   }
 
   function handleEventListeners() {
-    if (backButton.mouse.presses()) {
-      screen = 0;
-      backButton.pos = { x: -100, y: -100 };
-      homeScreenAssets();
-      hasWon = false;
-      winPlayed = false;
-      click.play();
-    }
+    // Button interactions are now handled in mousePressed()
   }
 
     function drawMuteButton() {
-      muteButton.pos = { x: 348, y: 15 }; // Consistent position
-      if (muteButton.mouse.presses()) {
-        isMuted = !isMuted;
-        muteButton.text = isMuted ? "Unmute" : "Mute";
-        forest.setVolume(isMuted ? 0 : 0.1);
-      }
+      muteButton.pos = { x: 522, y: 23 }; // Consistent position
+      // Button interactions are now handled in mousePressed()
     }
